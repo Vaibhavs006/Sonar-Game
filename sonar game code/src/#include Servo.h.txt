@@ -1,0 +1,64 @@
+#include <Servo.h>
+
+#define TRIG_PIN D5
+#define ECHO_PIN D6
+#define SERVO_PIN D4
+
+Servo myServo;
+
+long duration;
+float distance;
+
+void setup() {
+  Serial.begin(9600);
+  myServo.attach(SERVO_PIN);
+
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+
+  Serial.println("Starting Ultrasonic + Servo Test...");
+}
+
+void loop() {
+  // Sweep servo from 0° to 180°
+  for (int angle = 0; angle <= 180; angle += 10) {
+    myServo.write(angle);
+    delay(200);
+    distance = getDistance();
+    Serial.print("Angle: ");
+    Serial.print(angle);
+    Serial.print("°, Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+  }
+
+  // Sweep servo back from 180° to 0°
+  for (int angle = 180; angle >= 0; angle -= 10) {
+    myServo.write(angle);
+    delay(200);
+    distance = getDistance();
+    Serial.print("angle: ");
+    Serial.print(angle);
+    Serial.print("°, distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+  }
+}
+
+float getDistance() {
+  // Clear trigger
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+
+  // Send 10µs HIGH pulse
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  // Measure echo pulse duration
+  duration = pulseIn(ECHO_PIN, HIGH);
+
+  // Convert to cm
+  float dist = duration * 0.034 / 2;
+  return dist;
+}
